@@ -1,5 +1,5 @@
 /*
-** EPITECH PROJECT, 2023
+** KOREA UNIVERSITY PROJECT, 2023
 ** FuzzyCar
 ** File description:
 ** P2Server

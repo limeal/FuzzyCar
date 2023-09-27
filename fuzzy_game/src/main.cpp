@@ -7,9 +7,14 @@
 
 #include <iostream>
 
+#include "network/P2Server.hpp"
+
 int main(int ac, char **av) {
     (void)ac;
     (void)av;
-    std::cout << "Hello, World!" << std::endl;
+
+    Fuzzy::P2Server server(Fuzzy::P2Server::TCP, 4242);
+
+    server.Launch();
     return 0;
 }

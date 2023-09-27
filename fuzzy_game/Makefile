@@ -5,7 +5,8 @@
 ## Makefile
 ##
 
-SRC		=	$(wildcard src/*.cpp)
+SRC		=	$(wildcard src/*/*.cpp) \
+			$(wildcard src/*.cpp)
 
 OBJ		=	$(SRC:.cpp=.o)
 
@@ -15,7 +16,7 @@ CC	=	g++
 
 RM	=	rm -f
 
-FLAGS	=	-Wall -Wextra -Werror -std=c++20
+FLAGS	=	-Wall -Werror -std=c++20
 
 GRAPHIC_FLAGS	=	-lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 

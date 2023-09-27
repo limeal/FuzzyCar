@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "ostream": "cpp",
+        "exception": "cpp",
+        "string": "cpp",
+        "system_error": "cpp"
+    }
+}

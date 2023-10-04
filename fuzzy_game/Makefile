@@ -5,8 +5,11 @@
 ## Makefile
 ##
 
-SRC		=	$(wildcard src/*/*.cpp) \
-			$(wildcard src/*.cpp)
+SRC		=	src/main.cpp \
+			src/network/P2Server.cpp \
+			src/engine/graphics/2D/image/Image.cpp \
+			src/engine/graphics/3D/camera/Camera.cpp \
+			src/engine/window/Window.cpp
 
 OBJ		=	$(SRC:.cpp=.o)
 
@@ -18,7 +21,7 @@ RM	=	rm -f
 
 FLAGS	=	-Wall -Werror -std=c++20
 
-GRAPHIC_FLAGS	=	-lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
+GRAPHIC_FLAGS	=	-lraylib
 
 all:		$(NAME)
 

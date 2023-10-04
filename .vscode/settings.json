@@ -3,6 +3,7 @@
         "ostream": "cpp",
         "exception": "cpp",
         "string": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "array": "cpp"
     }
 }

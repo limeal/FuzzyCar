@@ -6,24 +6,23 @@
 */
 
 #include <iostream>
+#include <vector>
 
-#include "network/P2Server.hpp"
-#include "engine/Engine.hpp"
+// ./fuzzy map1.txt
+#include "functional/Map.hpp"
+#include "functional/Game.hpp"
 
 int main(int ac, char **av) {
-    (void)ac;
-    (void)av;
-
-    Fuzzy::Engine::Window window(Fuzzy::Engine::Vector2i(500, 500), "Fuzzy Car");
-
-    while(!window.shouldClose()) {
-        window.clearBackground(Fuzzy::Engine::Color(255, 255, 255));
-        window.beginDrawing();
-        window.endDrawing();
+    
+    if (ac != 2) {
+        std::cerr << "Usage: " << av[0] << " <map>" << std::endl;
+        return 84;
     }
 
-    /* Fuzzy::P2Server server(Fuzzy::P2Server::TCP, 4242);
-
-    server.Launch(); */
+    Fuzzy::Map map(av[1]);
+    Fuzzy::Game game(map);
+    
+    //map.print();
+    game.start();
     return 0;
 }

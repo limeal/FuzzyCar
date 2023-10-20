@@ -6,10 +6,10 @@
 ##
 
 SRC		=	src/main.cpp \
-			src/network/P2Server.cpp \
-			src/engine/graphics/2D/image/Image.cpp \
-			src/engine/graphics/3D/camera/Camera.cpp \
-			src/engine/window/Window.cpp
+			src/functional/Map.cpp \
+			src/functional/Game.cpp \
+			src/functional/entities/Car.cpp \
+			src/functional/entities/PlayerCar.cpp
 
 OBJ		=	$(SRC:.cpp=.o)
 
@@ -19,9 +19,9 @@ CC	=	g++
 
 RM	=	rm -f
 
-FLAGS	=	-Wall -Werror -std=c++20
+FLAGS	=	-std=c++20
 
-GRAPHIC_FLAGS	=	-lraylib
+GRAPHIC_FLAGS	=	-lncurses
 
 all:		$(NAME)
 

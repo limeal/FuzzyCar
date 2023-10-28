@@ -8,21 +8,30 @@
 #include <iostream>
 #include <vector>
 
-// ./fuzzy map1.txt
-#include "functional/Map.hpp"
-#include "functional/Game.hpp"
+#include "Fuzzy.hpp"
 
 int main(int ac, char **av) {
-    
-    if (ac != 2) {
-        std::cerr << "Usage: " << av[0] << " <map>" << std::endl;
+
+    try {
+        SDL::Core::Init();
+
+        SDL::Core::InitModules({
+            std::make_shared<SDL::SDLImage>(),
+            std::make_shared<SDL::SDLTtf>(),
+            std::make_shared<SDL::SDLMixer>()
+        });
+
+        Fuzzy::Assets::Load();
+
+        Fuzzy::Fuzzy fuzzy;
+        fuzzy.launch();
+    } catch (const SDL::BaseException &e) {
+        std::cerr << e.what() << std::endl;
+        Fuzzy::Assets::Unload();
+        SDL::Core::Quit();
         return 84;
     }
-
-    Fuzzy::Map map(av[1]);
-    Fuzzy::Game game(map);
-    
-    //map.print();
-    game.start();
+    Fuzzy::Assets::Unload();
+    SDL::Core::Quit();
     return 0;
 }

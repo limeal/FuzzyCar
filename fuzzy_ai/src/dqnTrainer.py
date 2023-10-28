@@ -9,39 +9,41 @@ import matplotlib.pyplot as plt
 
 class DQNTrainer(object):
     def __init__(
-            self,
-            env: gym.Env,
-            # env 설정, step과 reset만 만들면 됨
-            # step : step에 action을 집어 넣으면 next_state, reward, done, info 필요.
-            max_episode=500,
-            step_size=2000,
-            epsilon=0.99,
-            epsilon_decay=0.995,
-            temp_save_freq=100,
-            model_path=os.path.join(os.getcwd(), "model"),
-            model_name="model",
-            version="test",
-            min_epsilon=0.01,
-            temp_save=True,
-            save_on_colab=False,
+        self,
+        env: gym.Env,
+        max_episode=500,
+        step_size=2000,
+        epsilon=0.99,
+        epsilon_decay=0.995,
+        temp_save_freq=100,
+        model_path=os.path.join(os.getcwd(), "model"),
+        model_name="model",
+        version="test",
+        min_epsilon=0.01,
+        temp_save=True,
+        save_on_colab=False,
     ):
         self.agent = DQNAgent()
         self.max_episode = max_episode
         self.env = env
         self.step_size = step_size
         self.epsilon = epsilon
-
-        self.temp_save_freq = temp_save_freq  # 학습할때 임시로 저장할 빈도
-        self.model_path = model_path  # 모델을 저장할 경로
-        self.model_name = model_name  # 저장할 모델의 경
-        self.version = version  # 저장할 최종 모델의 버전
+        # 학습할때 임시로 저장할 빈도
+        self.temp_save_freq = temp_save_freq
+        # 모델을 저장할 경로
+        self.model_path = model_path
+        # 저장할 모델의 경로
+        self.model_name = model_name
+        # 저장할 최종 모델의 버전
+        self.version = version
         self.target_model_path = "target_" + model_path
-
         # epsilon greedy
         self.min_epsilon = min_epsilon
         self.epsilon_decay = epsilon_decay
-        self.temp_save = temp_save # 임시 저장 여부
-        self.save_on_colab = save_on_colab # colab에서 저장할지 여부
+        # 임시 저장 여부
+        self.temp_save = temp_save
+        # colab에서 저장할지 여부
+        self.save_on_colab = save_on_colab
         # episode별로 sum of reward를 저장
         self.save_epi_reward = []
         self.save_epi_step_num = []
@@ -56,12 +58,10 @@ class DQNTrainer(object):
             while not done:
                 if (np.random.randn(1)) <= self.epsilon:
                     # 0, 1 중에서 무작위로 수를 하나 뽑는다
-                    action = np.random.randint(3)  # action 0, 1, 2
+                    action = np.random.randint(3)
                 else:
                     # Q(cur_state,a)중에서 가장 값이 높도록 하는 a를 action으로 고른다
-                    # 여기서 6개로 받는게 맞나??
-                    # 아니면 액션을 1초 단위로 한번에 움직이는 걸로 바꾸자??
-                    output = self.agent.forward(cur_state.reshape(-1, 6))
+                    output = self.agent.forward(cur_state.reshape(-1, 4))
                     output = np.argmax(output)
                     action = output
 
@@ -115,8 +115,6 @@ class DQNTrainer(object):
 
         # --------------모든 에피소드 종료---------------- #
 
-        """
-
         # 모든 학습이 끝나면 모델을 저장한다
         if self.save_on_colab:
             self.colab_save(
@@ -168,4 +166,3 @@ class DQNTrainer(object):
             version=version,
             num_trained=num_trained,
         )
-    """

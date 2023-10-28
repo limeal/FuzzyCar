@@ -1,3 +1,7 @@
 *.o
 
 __pycache__
+
+libs
+old
+tests

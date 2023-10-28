@@ -5,7 +5,6 @@ from tensorflow.python.keras.backend import relu, sigmoid
 from tensorflow.python.keras.models import Sequential
 from ReplayMemory import ReplayMemory
 import numpy as np
-from ReplayMemory import ReplayMemory
 
 
 class DQNAgent(object):
@@ -29,11 +28,10 @@ class DQNAgent(object):
 
     def _create_model(self) -> Sequential:
         model = models.Sequential()
-        # input으로 6칸의 정보를 받는다
-        model.add(layers.Dense(128, activation=relu, input_shape=(6,)))
-        model.add(layers.Dense(64, activation=relu))
-        model.add(layers.Dense(3))
-        model.compile(optimizer="adam", loss="mse")  # , metrics=['mse']로 손실 기록?
+        model.add(layers.Dense(10, activation=relu, input_shape=(6,)))
+        model.add(layers.Dense(10, activation=relu))
+        model.add(layers.Dense(2))
+        model.compile(optimizer="rmsprop", loss="mse")  # Loss function => MSE
         return model
 
     def forward(self, data):
@@ -52,7 +50,7 @@ class DQNAgent(object):
 
         current_states = np.stack([sample[0] for sample in samples])
         current_q = self.model.predict(current_states)
-        next_states = np.stack([sample[5] for sample in samples]) # 4??
+        next_states = np.stack([sample[5] for sample in samples])
         next_q = self.target_model.predict(next_states)
 
         for i, (cur_state, action, reward, done, info, next_state) in enumerate(
@@ -76,8 +74,6 @@ class DQNAgent(object):
     def _update_target_model(self):
         self.target_model.set_weights(self.model.get_weights())
 
-    # ------------------------------------------------------------#
-    """
     def save(
         self,
         path: str,
@@ -86,11 +82,11 @@ class DQNAgent(object):
         num_trained: int,
         target_model_name: str = None,
     ):
-        
-        #모델 저장 이름 예시
-        #/path/fuzzycar_v5_300_trained.h5
+        """
+        모델 저장 이름 예시
+        /path/fuzzycar_v5_300_trained.h5
 
-        
+        """
         save_name = f"{path}/{model_name}_{version}_{num_trained}_trained.h5"
         target_model_name = f"target_{model_name}"
         target_save_name = (
@@ -114,4 +110,3 @@ class DQNAgent(object):
         )
         self.model = keras.models.load_model(save_name)
         self.target_model = keras.models.load_model(target_save_name)
-    """

@@ -14,11 +14,8 @@
 namespace Fuzzy {
     class FuzzyException : public std::exception {
         public:
-            enum FuzzyExceptionType {
-                NETWORK,
-            };
 
-            FuzzyException(const FuzzyExceptionType &type, std::string const &_content) : _content(
+            FuzzyException(std::string const &_content) : _content(
                 std::string("[FuzzyException]: ") + _content
             ) {};
 

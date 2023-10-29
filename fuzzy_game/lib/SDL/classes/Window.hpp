@@ -32,6 +32,8 @@ namespace SDL
             bool isOpen() const { return _open; }
             bool isFullscreen() const { return SDL_GetWindowFlags(_window) & SDL_WINDOW_FULLSCREEN; }
 
+            void setViewport(SDL_Rect *rect) { SDL_RenderSetViewport(_renderer, rect); }
+
             SDL_Window *getWindow() const { return _window; }
             const std::string &getTitle() const { return _title; }
             const Vector2i &getSize() const { return _size; }

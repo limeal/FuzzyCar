@@ -7,6 +7,9 @@
 
 SRC		=	src/main.cpp \
 			src/Fuzzy.cpp \
+			src/entities/EntityCar.cpp \
+			src/entities/EntityPlayer.cpp \
+			src/levels/Level.cpp \
 			lib/SDL/SDL.cpp \
 			lib/SDL/SDLModule.cpp \
 			lib/SDL/modules/SDLImage.cpp \

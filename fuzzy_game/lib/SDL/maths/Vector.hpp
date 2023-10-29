@@ -16,6 +16,7 @@ namespace SDL
     class Vector2D
     {
     public:
+        Vector2D() : x(0), y(0){};
         Vector2D(U x, U y) : x(x), y(y){};
         ~Vector2D() = default;
 
@@ -49,6 +50,7 @@ namespace SDL
     class Vector3D 
     {
     public:
+        Vector3D() : x(0), y(0), z(0){};
         Vector3D(V x, V y, V z) : x(x), y(y), z(z){};
         ~Vector3D() = default;
 

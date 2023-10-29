@@ -11,19 +11,12 @@
 #include <memory>
 
 Fuzzy::Fuzzy::Fuzzy(SDL::Vector2i size) :
-    _window("FuzzyCar", size)
-    /* ,
-    _player("assets/cars/blue.png", {10, 10, 16, 16}, SDL::Vector2i(64, 64), true) */
+    _window("FuzzyCar", size),
+    _level(_window, Assets::BACKGROUND, {339, 563, 788}, 10, 10),
+    _player(nullptr)
 {
-    // Background
-    _background.load(_window, Assets::BACKGROUND);
-    _background.setPosition(SDL::Vector2i(0, 0));
-    _background.setSize(size);
 
-    // Player
-    _player.load(_window, Assets::BLUE_CAR, {0, 0, 16, 16});
-    _player.setPosition(SDL::Vector2i(size.x / 4, size.y - 64));
-    _player.setSize(SDL::Vector2i(64, 64));
+    _player = std::make_unique<EntityPlayer>(_window, _level.getRealPosition(0, _level.getMaxSteps() - 1));
 
     _fpsText.load(std::to_string(FPS), Assets::ROBOTO_FONT, { 255, 0, 0 });
 
@@ -46,6 +39,11 @@ void Fuzzy::Fuzzy::launch()
     Uint64 frameTime = 0;
 
     Assets::SOUNDTRACK.play();
+
+    SDL::Vector2i playerPosition = _player->getPosition();
+
+    SDL_Rect rect = {0, playerPosition.y - (_window.getSize().y / 2), _window.getSize().x, _window.getSize().y};
+    _window.setViewport(&rect);
     while (_window.isOpen()) {
         frameStart = SDL::Core::GetTicks();
         
@@ -69,13 +67,8 @@ void Fuzzy::Fuzzy::handleEvents()
             _window.close();
             break;
         case SDL_KEYDOWN:
+            _player->consume(e);
             switch (e->key.keysym.sym) {
-                case SDLK_LEFT:
-                    _player.setPosition(_player.getPosition() - SDL::Vector2i(5, 0));
-                    break;
-                case SDLK_RIGHT:
-                    _player.setPosition(_player.getPosition() + SDL::Vector2i(5, 0));
-                    break;
                 case SDLK_UP:
                     FPS += 10;
                     _fpsText.setText(std::to_string(FPS));
@@ -101,18 +94,15 @@ void Fuzzy::Fuzzy::handleEvents()
 
 void Fuzzy::Fuzzy::update()
 {
-    if (_player.getPosition().y > -20)
-        _player.setPosition(_player.getPosition() - SDL::Vector2i(0, 1));
-    else
-        _player.setPosition(SDL::Vector2i(_player.getPosition().x, _window.getSize().y));
+    _player->update(_level);
 }
 
 void Fuzzy::Fuzzy::draw()
 {
     _window.clear();
     
-    _background.draw(_window);
-    _player.draw(_window);
+    _level.render(_window);
+    _player->render(_window);
 
     SDL::Sprite texture;
     texture.load(_window, _fpsText, {0, 0, 100, 64});

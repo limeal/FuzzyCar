@@ -7,16 +7,41 @@
 
 #include "EntityCar.hpp"
 
-Fuzzy::EntityCar::EntityCar(SDL::Sprite &sprite, SDL::Vector2i position, SDL::Vector2i direction) :
-    _sprite(sprite),
-    _direction(direction)
+#include "../Fuzzy.hpp"
+
+Fuzzy::EntityCar::EntityCar(SDL::Vector2i position, SDL::Vector2i direction) :
+    _direction(direction),
+    _currentLane(0),
+    _currentStep(0),
+    _speed(1.0f)
 {
-    _sprite.setPosition(position);
 }
 
-void Fuzzy::EntityCar::update()
+Fuzzy::EntityCar::EntityCar(SDL::Window &window, SDL::Vector2i position, SDL::Vector2i direction) :
+    _direction(direction),
+    _currentLane(0),
+    _currentStep(0),
+    _speed(1.0f)
 {
-    _sprite.updateTexture(_sprite.getPosition() + _direction);
+    // Enemy
+    _sprite.load(window, Assets::RED_CAR, {0, 0, 16, 16});
+    _sprite.setPosition(position);
+    _sprite.setOrigin(SDL::Vector2i(32, 32));
+    _sprite.setSize(SDL::Vector2i(64, 64));
+}
+
+void Fuzzy::EntityCar::update(Level &level)
+{
+    _currentStep += _direction.y;
+    
+    if (_currentStep < 0) _currentStep = level.getMaxSteps() - 1;
+
+    SDL::Vector2i target = level.getRealPosition(_currentLane, _currentStep);
+    std::cout << "Target: " << target.x << ", " << target.y << std::endl;
+
+    target.x -= _sprite.getOrigin().x;
+
+    _sprite.setPosition(target);
 }
 
 void Fuzzy::EntityCar::render(SDL::Window &window)

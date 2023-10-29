@@ -23,7 +23,7 @@ int main(int ac, char **av) {
 
         Fuzzy::Assets::Load();
 
-        Fuzzy::Fuzzy fuzzy;
+        Fuzzy::Fuzzy fuzzy(SDL::Vector2i(512, 512));
         fuzzy.launch();
     } catch (const SDL::BaseException &e) {
         std::cerr << e.what() << std::endl;

@@ -7,8 +7,13 @@
 
 #pragma once
 
+#include <vector>
+#include <memory>
+
 #include "../lib/SDL/SDL.hpp"
 #include "Assets.hpp"
+
+#include "levels/Level.hpp"
 
 // Entities
 #include "entities/EntityPlayer.hpp"
@@ -16,7 +21,7 @@
 namespace Fuzzy {
     class Fuzzy {
         public:
-            Fuzzy(SDL::Vector2i size = SDL::Vector2i(512, 512));
+            Fuzzy(SDL::Vector2i size);
 
             void launch();
         private:
@@ -26,17 +31,15 @@ namespace Fuzzy {
 
             SDL::Window _window;
 
-            // Sprites
-            SDL::Sprite _background;
-
-            SDL::Sprite _player;
-            //EntityPlayer _player;
+            Level _level;
+            std::unique_ptr<EntityPlayer> _player;
 
             // Texts
             SDL::Text _fpsText;
 
 
             inline static std::string VERSION = "0.1";
-            inline static int FPS = 60;
+            inline static int FPS = 20;
+
     };
 }

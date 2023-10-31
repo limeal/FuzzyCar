@@ -1,5 +1,0 @@
-socket=*
-threading=*
-
-keras==2.3.1
-tensorflow==2.14.0

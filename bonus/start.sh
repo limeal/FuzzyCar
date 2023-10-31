@@ -1,0 +1,2 @@
+make
+./fuzzy_game 

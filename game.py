@@ -63,7 +63,7 @@ enemy_position = [
 ]
     
 class CarGame:
-    def __init__(self, mode=GameMode.PRINT, grid_size=(100, 3), num_enemies=50, num_players=1, player_pos=(0, 1), goal_pos=(99, 1), enemies=None):
+    def __init__(self, mode=GameMode.PRINT, grid_size=(100, 3), num_enemies=15, num_players=1, player_pos=(0, 1), goal_pos=(99, 1), enemies=None):
         self.stdscr = None
         self.mode = mode
         self.grid_size = grid_size
@@ -73,18 +73,16 @@ class CarGame:
         self.goal_pos = goal_pos
         self.enemies = enemies
         if enemies is None:
-            self.enemy_pos = [(np.random.randint(0, grid_size[0]), np.random.randint(0, grid_size[1])) for _ in
+            self.enemies = [(np.random.randint(0, grid_size[0]), np.random.randint(0, grid_size[1])) for _ in
                           range(num_enemies)]
-        else:
-            self.enemy_pos = enemies.copy()
+        self.enemy_pos = self.enemies.copy()
         self.game_over = False
         self.action_space = 3
         self.win = False
 
     def reset(self):
         self.players = [(0, 1) for i in range(self.num_players)]
-        self.enemy_pos = self.enemies.copy() if self.enemies is not None else [(np.random.randint(0, self.grid_size[0]), np.random.randint(0, self.grid_size[1])) for _ in
-                          range(self.num_enemies)]
+        self.enemy_pos = self.enemies.copy()
         self.num_enemies = len(self.enemy_pos)
         self.game_over = False
         return self.get_state()
@@ -163,6 +161,17 @@ class CarGame:
     def is_game_over(self):
         return self.game_over
 
+    def render_win(self, stdscr, epoch = 0, epoch_reward = 0, best_epoch = 0, best_reward = 0):
+        stdscr.clear()
+        rows, cols = stdscr.getmaxyx()
+        stdscr.addstr(int(rows / 2) - 4, int(cols / 2), "You Win!")
+        stdscr.addstr(int(rows / 2) - 2, int(cols / 2) - 8, "Press any key to exit...")
+        stdscr.addstr(int(rows / 2), int(cols / 2) - 8, "<---- Summary ---->")
+        stdscr.addstr(int(rows / 2) + 1, int(cols / 2) - 8, "Epoch: " + str(epoch))
+        stdscr.addstr(int(rows / 2) + 2, int(cols / 2) - 8, "Reward: " + str(epoch_reward))
+        stdscr.addstr(int(rows / 2) + 3, int(cols / 2) - 8, "Best Epoch: " + str(best_epoch))
+        stdscr.addstr(int(rows / 2) + 4, int(cols / 2) - 8, "Best Reward: " + str(best_reward))
+        
     
     def render(self, state, start_line=0, stdscr = None, epoch = 0, epoch_reward = 0, best_epoch = 0, best_reward = 0):
         if stdscr is not None:
@@ -235,60 +244,51 @@ def launch(stdscr = None):
         curses.init_pair(i + 1, i, -1)
 
     start_line = 0
-    for i in range(0, args.instances):
-        state = game.get_state()
-        epoch = 0
-        epoch_reward = 0
-        best_reward = 0
-        best_epoch = 0
+    state = game.get_state()
+    epoch = 0
+    epoch_reward = 0
+    best_reward = 0
+    best_epoch = 0
+    
+    yPlayer = -1
+    while game.win == False:        
+        for i in range(0, args.player):
+            action = agent.select_action(state.flatten())
+            next_state, reward, done = game.step(i, action)
+            yPlayer = game.get_player_pos(i)[0]
+        start_line = (yPlayer - 5)
+        if start_line < 0:
+            start_line = 0
+            
+        game.render(state, start_line, stdscr, epoch, epoch_reward, best_epoch, best_reward)
+        state = next_state
         
-        yPlayer = -1
-        while True:
-            for i in range(0, args.player):
-                action = agent.select_action(state.flatten())
-                next_state, reward, done = game.step(i, action)
-                yPlayer = game.get_player_pos(i)[0]
-
-            start_line = (yPlayer - 5)
-            if start_line < 0:
-                start_line = 0
-                
-            game.render(state, start_line, stdscr, epoch, epoch_reward, best_epoch, best_reward)
-            state = next_state
+        if done:
+            state = game.reset()
             
-            if game.win == True:
-                curses.nocbreak()
-                curses.echo()
-                curses.endwin()
-                
-                print("You win!")
-                
-                sys.exit(0)
+            if epoch_reward > best_reward:
+                best_epoch = epoch
+                best_reward = epoch_reward
             
-            if done:
-                state = game.reset()
-                
-                if epoch_reward > best_reward:
-                    best_epoch = epoch
-                    best_reward = epoch_reward
-                
-                epoch += 1
-                epoch_reward = 0
-            else:
-                epoch_reward += 0.3
-                epoch_reward += reward
-
-            ch = stdscr.getch()
-            if ch == ord('q'):
-                break;
-
-            if ch == ord('s') and (start_line + stdscr.getmaxyx()[0]) < game.grid_size[0]:
-                start_line += 1
-                continue
-
-            if ch == ord('w') and start_line > 0:
-                start_line -= 1
-                continue
+            epoch += 1
+            epoch_reward = 0
+        else:
+            epoch_reward += 0.3
+            epoch_reward += reward
+        ch = stdscr.getch()
+        if ch == ord('q'):
+            break;
+        if ch == ord('s') and (start_line + stdscr.getmaxyx()[0]) < game.grid_size[0]:
+            start_line += 1
+            continue
+        if ch == ord('w') and start_line > 0:
+            start_line -= 1
+            continue
+    
+    if game.win == True:
+        stdscr.nodelay(False)
+        game.render_win(stdscr, epoch, epoch_reward, best_epoch, best_reward)
+        ch = stdscr.getch()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -304,7 +304,7 @@ if __name__ == '__main__':
     
     
     args = parser.parse_args()
-    game = CarGame(GameMode.CURSES, num_enemies=len(enemy_position), enemies=enemy_position, num_players=args.player)
+    game = CarGame(GameMode.CURSES, num_players=args.player)
 
     def signal_handler(sig, frame):
         print('You pressed Ctrl+C!')

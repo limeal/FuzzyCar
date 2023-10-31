@@ -47,7 +47,8 @@ class DQN(nn.Module):
 
     def forward(self, x):
         return self.fc(x)
-
+    
+losses =  []
 
 class DQNAgent:
     def __init__(
@@ -95,28 +96,23 @@ class DQNAgent:
         batch = random.sample(self.memory, batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
 
-        states = np.array(states, dtype=np.float32)  # Convert the list to a single NumPy ndarray
-        states = torch.from_numpy(states) # Convert the NumPy array to a PyTorch tensor
-        
-        actions = np.array(actions, dtype=np.int64)  # Convert the list to a single NumPy ndarray
-        actions = torch.from_numpy(actions) # Convert the NumPy array to a PyTorch tensor
-        
-        rewards = np.array(rewards, dtype=np.float32)  # Convert the list to a single NumPy ndarray
-        rewards = torch.from_numpy(rewards) # Convert the NumPy array to a PyTorch tensor
-        
-        next_states = np.array(next_states, dtype=np.float32)  # Convert the list to a single NumPy ndarray
-        next_states = torch.from_numpy(next_states) # Convert the NumPy array to a PyTorch tensor
-        
-        dones = np.array(dones, dtype=np.float32)  # Convert the list to a single NumPy ndarray
-        dones = torch.from_numpy(dones) # Convert the NumPy array to a PyTorch tensor
+        states = torch.tensor(states, dtype=torch.float32)
+        actions = torch.tensor(actions, dtype=torch.int64)
+        rewards = torch.tensor(rewards, dtype=torch.float32)
+        next_states = torch.tensor(next_states, dtype=torch.float32)
+        dones = torch.tensor(dones, dtype=torch.float32)
 
         q_values = self.policy_net(states).gather(1, actions.unsqueeze(1))
         next_q_values = self.target_net(next_states).max(1)[0].detach()
         expected_q_values = rewards.unsqueeze(1) + self.gamma * next_q_values * (
             1 - dones.unsqueeze(1)
         )
+
         loss = nn.functional.smooth_l1_loss(q_values, expected_q_values)
 
+        loss_arr = loss.detach()
+
+        losses.append(loss_arr)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
@@ -128,7 +124,7 @@ class DQNAgent:
 
 
 # 환경과 에이전트 초기화
-def train(agent, env, num_episodes=260, max_steps=300, batch_size=32):
+def train(agent, env, num_episodes=300, max_steps=300, batch_size=32):
     memory = ReplayBuffer()
     # 학습 파라미터 설정
     episode_rewards = []
@@ -137,42 +133,49 @@ def train(agent, env, num_episodes=260, max_steps=300, batch_size=32):
     for episode in range(num_episodes):
         state = env.reset()
         episode_reward = 0
-    
+
         for step in range(max_steps):
             action = agent.select_action(state.flatten())
             next_state, reward, done = env.step(action)
-            # Replay memory에 샘플 <s, a, r, s'> 저장
-            agent.memory.append((state.flatten(), action, reward, next_state.flatten(), done))
+            agent.memory.append(
+                (state.flatten(), action, reward, next_state.flatten(), done)
+            )
             memory.put([state,action,reward,next_state,done])
 
             if not done:
                 episode_reward += 0.3
+
             episode_reward += reward
+
             state = next_state
+
             if done:
                 break
-            
+
+
         agent.train(batch_size)
         agent.update_target_network()
-    
+
         episode_rewards.append(episode_reward)
-    
+
         if (episode + 1) % 10 == 0:
             print(f"Episode {episode + 1}, Reward: {episode_reward}")
-    
+
         agent.train(batch_size)
         agent.update_target_network()
+
+        print(f"Episode {episode + 1}, Reward: {episode_reward}")
     
     if memory.size() > 2000:
         agent.train(batch_size)
     
-    """ plt.figure(figsize=(10, 6))
-    plt.plot(episode_rewards)
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(1, num_episodes + 1), episode_rewards, linestyle='-', color='b')
     plt.xlabel('Episode')
     plt.ylabel('Reward')
     plt.title('Episode Rewards')
     plt.grid(True)
-    plt.show() """
+    plt.show()
     
     return agent
     
